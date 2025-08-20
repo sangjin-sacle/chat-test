@@ -6,7 +6,7 @@
 ---
 
 ## 🚀 Live Demo
-- [https://USERNAME.github.io/hello-world/](https://USERNAME.github.io/hello-world/)  
+- [[https://USERNAME.github.io/hello-world/](https://USERNAME.github.io/hello-world/)  ](https://sangjin-sacle.github.io/chat-test/)
   (※ 위 주소에서 `USERNAME`을 본인 GitHub 계정명으로 바꿔 접속하세요)
 
 ---
