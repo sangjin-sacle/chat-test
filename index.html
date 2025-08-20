@@ -1,40 +1,207 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko">
 <head>
-  <meta charset="UTF-8">
-  <title>Hello World</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Chatbot Test · ChannelIO Playground</title>
+  <!-- Tailwind (CDN) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <meta name="description" content="ChannelIO 챗봇/위젯 기능을 빠르게 테스트하는 페이지" />
+  <style>
+    /* 살짝 유리(Glass) 느낌 */
+    .glass {
+      backdrop-filter: saturate(180%) blur(10px);
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.15);
+    }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+  </style>
 </head>
-<body>
-  <h1>Hello World!</h1>
-  <p>This is my first GitHub Pages site.</p>
+<body class="min-h-screen bg-gradient-to-br from-slate-900 via-gray-900 to-zinc-900 text-slate-100">
+  <!-- 헤더 -->
+  <header class="w-full">
+    <div class="mx-auto max-w-5xl px-6 py-8">
+      <div class="flex items-center justify-between">
+        <h1 class="text-2xl md:text-3xl font-semibold tracking-tight">
+          ChannelIO Chatbot <span class="opacity-70">Test Page</span>
+        </h1>
+        <a href="#" class="text-sm underline decoration-dashed opacity-70 hover:opacity-100"
+           onclick="location.reload(); return false;">새로고침</a>
+      </div>
+      <p class="mt-2 opacity-80">
+        아래 컨트롤로 채널톡 위젯을 <span class="font-semibold">열고/닫고</span>,
+        <span class="font-semibold">이벤트 트래킹</span>, <span class="font-semibold">사용자 프로필</span> 전달 등을 테스트해보세요.
+      </p>
+    </div>
+  </header>
 
-  <!-- ChannelIO Script -->
+  <!-- 메인 -->
+  <main class="mx-auto max-w-5xl px-6 pb-16">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <!-- 컨트롤 패널 -->
+      <section class="glass rounded-2xl p-6 lg:col-span-2">
+        <h2 class="text-lg font-semibold">Playground Controls</h2>
+        <p class="mt-1 text-sm opacity-80">버튼을 눌러 다양한 ChannelIO API 동작을 시험해 보세요.</p>
+
+        <!-- 위젯 제어 -->
+        <div class="mt-6">
+          <h3 class="font-medium mb-2">Widget</h3>
+          <div class="flex flex-wrap gap-2">
+            <button class="px-3 py-2 rounded-xl bg-white/10 hover:bg-white/20" onclick="openWidget()">열기 (show)</button>
+            <button class="px-3 py-2 rounded-xl bg-white/10 hover:bg-white/20" onclick="hideWidget()">닫기 (hide)</button>
+            <button class="px-3 py-2 rounded-xl bg-white/10 hover:bg-white/20" onclick="toggleWidget()">토글</button>
+          </div>
+        </div>
+
+        <!-- 이벤트 트래킹 -->
+        <div class="mt-6">
+          <h3 class="font-medium mb-2">Track Event</h3>
+          <div class="flex flex-col sm:flex-row gap-2">
+            <input id="eventName" class="w-full sm:w-48 px-3 py-2 rounded-xl bg-white/5 border border-white/10"
+                   placeholder="이벤트 이름 (예: test_event)" value="test_event"/>
+            <input id="eventPayload" class="w-full px-3 py-2 rounded-xl bg-white/5 border border-white/10 mono"
+                   placeholder='payload JSON (예: {"plan":"pro","value":123})'
+                   value='{"plan":"pro","value":123}'/>
+            <button class="px-3 py-2 rounded-xl bg-white/10 hover:bg-white/20"
+                    onclick="trackEvent()">전송</button>
+          </div>
+        </div>
+
+        <!-- 유저 프로필 -->
+        <div class="mt-6">
+          <h3 class="font-medium mb-2">User Profile (updateUser)</h3>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+            <input id="userName" class="px-3 py-2 rounded-xl bg-white/5 border border-white/10" placeholder="이름" value="홍상진"/>
+            <input id="userEmail" class="px-3 py-2 rounded-xl bg-white/5 border border-white/10" placeholder="이메일" value="tester@example.com"/>
+            <input id="userPhone" class="px-3 py-2 rounded-xl bg-white/5 border border-white/10" placeholder="전화번호" value="+82-10-1234-5678"/>
+          </div>
+          <div class="flex flex-wrap gap-2 mt-2">
+            <button class="px-3 py-2 rounded-xl bg-white/10 hover:bg-white/20" onclick="updateUser()">프로필 업데이터</button>
+            <button class="px-3 py-2 rounded-xl bg-white/10 hover:bg-white/20" onclick="setMemberId()">memberId 설정 (가짜)</button>
+          </div>
+          <p class="mt-1 text-xs opacity-70">* 개인정보는 테스트용 더미 값을 사용하세요.</p>
+        </div>
+
+        <!-- 세션 제어 -->
+        <div class="mt-6">
+          <h3 class="font-medium mb-2">Session</h3>
+          <div class="flex flex-wrap gap-2">
+            <button class="px-3 py-2 rounded-xl bg-white/10 hover:bg-white/20" onclick="shutdown()">Shutdown (세션 종료)</button>
+            <button class="px-3 py-2 rounded-xl bg-white/10 hover:bg-white/20" onclick="rebootAnon()">Reboot (익명)</button>
+          </div>
+        </div>
+
+        <!-- 안내 -->
+        <div class="mt-6 text-sm opacity-80">
+          <ul class="list-disc pl-5 space-y-1">
+            <li>버튼 동작 결과는 우측 <span class="font-medium">Log Console</span>에 표시됩니다.</li>
+            <li>브라우저 차단(팝업/추적 방지) 설정에 따라 일부 동작이 제한될 수 있어요.</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- 로그 콘솔 -->
+      <aside class="glass rounded-2xl p-6">
+        <h2 class="text-lg font-semibold">Log Console</h2>
+        <div id="log" class="mono text-xs leading-relaxed whitespace-pre-wrap bg-black/30 border border-white/10 rounded-xl p-3 mt-3 h-[420px] overflow-auto">
+[ready] Playground initialized.
+        </div>
+        <div class="mt-3 flex gap-2">
+          <button class="px-3 py-2 rounded-xl bg-white/10 hover:bg-white/20 w-full" onclick="clearLog()">Clear</button>
+          <button class="px-3 py-2 rounded-xl bg-white/10 hover:bg-white/20 w-full" onclick="copyLog()">Copy</button>
+        </div>
+
+        <div class="mt-6 text-xs opacity-70">
+          <p>현재 페이지는 GitHub Pages로 호스팅되며 채널톡 <span class="mono">boot()</span> 에서 제공한 <span class="mono">pluginKey</span>로 동작합니다.</p>
+        </div>
+      </aside>
+    </div>
+  </main>
+
+  <!-- 페이지 스크립트: Playground 동작 -->
   <script>
-    (function(){
-      var w=window;
-      if(w.ChannelIO){
-        return w.console.error("ChannelIO script included twice.");
+    const $log = document.getElementById('log');
+    function log(...args){ const line = args.map(a => {
+        try { return typeof a === 'string' ? a : JSON.stringify(a, null, 2); }
+        catch(e){ return String(a); }
+      }).join(' ');
+      $log.textContent += '\\n' + line;
+      $log.scrollTop = $log.scrollHeight;
+    }
+    function clearLog(){ $log.textContent = ''; log('[cleared]'); }
+    async function copyLog(){
+      try { await navigator.clipboard.writeText($log.textContent); log('[copied]'); }
+      catch(e){ log('[copy failed]', e); }
+    }
+
+    // Widget controls
+    function openWidget(){ try{ ChannelIO('show'); log('→ show'); } catch(e){ log('show error', e); } }
+    function hideWidget(){ try{ ChannelIO('hide'); log('→ hide'); } catch(e){ log('hide error', e); } }
+    function toggleWidget(){
+      try{
+        ChannelIO('isMessengerVisible', function(visible){
+          if(visible){ ChannelIO('hide'); log('→ toggle: hide'); }
+          else{ ChannelIO('show'); log('→ toggle: show'); }
+        });
+      } catch(e){ log('toggle error', e); }
+    }
+
+    // Track event
+    function trackEvent(){
+      const name = document.getElementById('eventName').value || 'test_event';
+      let payload = {};
+      try{
+        const raw = document.getElementById('eventPayload').value.trim();
+        payload = raw ? JSON.parse(raw) : {};
+      } catch(e){
+        log('payload JSON parse error:', e);
       }
-      var ch=function(){ch.c(arguments);};
-      ch.q=[];
-      ch.c=function(args){ch.q.push(args);};
-      w.ChannelIO=ch;
-      function l(){
-        if(w.ChannelIOInitialized){return;}
-        w.ChannelIOInitialized=true;
-        var s=document.createElement("script");
-        s.type="text/javascript";
-        s.async=true;
-        s.src="https://cdn.channel.io/plugin/ch-plugin-web.js";
-        var x=document.getElementsByTagName("script")[0];
-        if(x.parentNode){x.parentNode.insertBefore(s,x);}
-      }
-      if(document.readyState==="complete"){l();}
-      else{
-        w.addEventListener("DOMContentLoaded",l);
-        w.addEventListener("load",l);
-      }
-    })();
+      try{
+        ChannelIO('track', name, payload);
+        log('→ track', { name, payload });
+      } catch(e){ log('track error', e); }
+    }
+
+    // Update user profile
+    function updateUser(){
+      const profile = {
+        name: document.getElementById('userName').value || undefined,
+        email: document.getElementById('userEmail').value || undefined,
+        mobileNumber: document.getElementById('userPhone').value || undefined
+      };
+      try{
+        ChannelIO('updateUser', { profile });
+        log('→ updateUser', profile);
+      } catch(e){ log('updateUser error', e); }
+    }
+
+    // Assign a (fake) memberId to simulate logged-in user
+    function setMemberId(){
+      const memberId = 'testuser_' + Math.random().toString(36).slice(2, 8);
+      try{
+        ChannelIO('updateUser', { memberId });
+        log('→ updateUser memberId', memberId);
+      } catch(e){ log('memberId error', e); }
+    }
+
+    // Shutdown and Reboot
+    function shutdown(){
+      try{
+        ChannelIO('shutdown');
+        log('→ shutdown (session closed). You can reboot below.');
+      } catch(e){ log('shutdown error', e); }
+    }
+    function rebootAnon(){
+      try{
+        ChannelIO('boot', { pluginKey: '42936c8c-2306-4c80-a586-82c51e4c8c01' });
+        log('→ boot (anonymous)');
+      } catch(e){ log('reboot error', e); }
+    }
+  </script>
+
+  <!-- ★★★ ChannelIO Script: 요청하신 그대로 유지 ★★★ -->
+  <script>
+    (function(){var w=window;if(w.ChannelIO){return w.console.error("ChannelIO script included twice.");}var ch=function(){ch.c(arguments);};ch.q=[];ch.c=function(args){ch.q.push(args);};w.ChannelIO=ch;function l(){if(w.ChannelIOInitialized){return;}w.ChannelIOInitialized=true;var s=document.createElement("script");s.type="text/javascript";s.async=true;s.src="https://cdn.channel.io/plugin/ch-plugin-web.js";var x=document.getElementsByTagName("script")[0];if(x.parentNode){x.parentNode.insertBefore(s,x);}}if(document.readyState==="complete"){l();}else{w.addEventListener("DOMContentLoaded",l);w.addEventListener("load",l);}})();
 
     ChannelIO('boot', {
       "pluginKey": "42936c8c-2306-4c80-a586-82c51e4c8c01"
